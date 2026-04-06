@@ -4,15 +4,15 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
-  "main": "index.js",
-  "scripts": {
+  "type": "module",
+  "main": "src/index.js",
+    "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "ej1" : "node ./ index.js"
-
+    "ej1": "node src/index.js"
   },
   "dependencies": {
-    "expres": "^0.0.5",
+    "axios": "^1.14.0",
+    "cors": "^2.8.6",
     "express": "^5.2.1"
   }
 }

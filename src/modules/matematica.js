@@ -13,7 +13,7 @@ const multiplicar = (a, b) => {
 }
 
 const dividir = (a, b) => {
- let resultado = a % b;
+ let resultado = a / b;
  return resultado
 }
 ;

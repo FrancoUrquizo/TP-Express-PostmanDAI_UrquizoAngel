@@ -1,5 +1,5 @@
 import express  from "express"; // hacer npm i express
-
+import ValidacionesHelper from './modules/validaciones-helper.js';
 import cors     from "cors";    // hacer npm i cors
 import { resta, sumar, multiplicar, dividir, PI } from '../src/modules/matematica.js';
 import{ OMDBSearchByPage, OMDBSearchComplete, OMDBGetByImdbID} from '../src/modules/omdb-wrapper.js';
@@ -32,7 +32,7 @@ app.get('/', (req, res) => {                // EndPoint "/"
 
 app.get('/saludar/:nombre', (req, res) => {             // EndPoint "/saludar"
 
-    res.send('Hola' + req.params.nombre)
+    res.send('Hola' + ValidacionesHelper.getStringOrDefault(req.params.nombre, 'Anonimo'))
 
 
 })
@@ -42,7 +42,7 @@ app.get('/validarfecha/:ano/:mes/:dia', (req, res) => {             // EndPoint 
 
 
 
-   if(isNaN (req.params.ano) || isNaN (req.params.mes) || isNaN (req.params.dia))
+   if(isNaN (ValidacionesHelper.getDateOrDefault(req.params.ano, 0)) || isNaN (ValidacionesHelper.getDateOrDefault(req.params.mes, 0)) || isNaN (ValidacionesHelper.getDateOrDefault(req.params.dia, 0)))
     {
 
       if ( Date.parse (`${req.params.ano}-${req.params.mes}-${req.params.dia}`))
@@ -51,7 +51,7 @@ app.get('/validarfecha/:ano/:mes/:dia', (req, res) => {             // EndPoint 
     
         }
     }
-    else 
+    if(ValidacionesHelper.getDateOrDefault(req.params.ano, 0) === 0 || ValidacionesHelper.getDateOrDefault(req.params.mes, 0) === 0 || ValidacionesHelper.getDateOrDefault(req.params.dia, 0) === 0)
         
          res.status(400)
 

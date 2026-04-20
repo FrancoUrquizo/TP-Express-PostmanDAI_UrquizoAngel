@@ -5,6 +5,10 @@ import { resta, sumar, multiplicar, dividir, PI } from '../src/modules/matematic
 import{ OMDBSearchByPage, OMDBSearchComplete, OMDBGetByImdbID} from '../src/modules/omdb-wrapper.js';
 import Alumno from '../src/models/alumno.js';
 
+import validacionesHelper from "./modules/validaciones-helper.js";
+import DateTimeHelper     from './modules/datetime-helper.js';
+
+
 const app  = express();
 
 const port = 3000;              // El puerto 3000 (http://localhost:3000)
@@ -71,11 +75,11 @@ app.listen(port, () => {
 
 app.get("/matematica/sumar", (req, res) =>{
 
-   const n1 = parseFloat(req.query.n1);
-    const n2 = parseFloat(req.query.n2);
+   const n1 = parseFloat(ValidacionesHelper.getIntegerOrDefault(req.query.n1 ,null));
+    const n2 = parseFloat(ValidacionesHelper.getIntegerOrDefault(req.query.n2, null));
 
    
-    if (isNaN(n1) || isNaN(n2)) {
+    if ((n1 === null) || (n2 === null)) {
         return res.status(400).send("Error: Ambos parámetros deben ser números.");
     }
 
@@ -88,10 +92,10 @@ app.get("/matematica/sumar", (req, res) =>{
 
 app.get("/matematica/resta", (req, res) =>{
 
-   const n1 = parseFloat(req.query.n1);
-    const n2 = parseFloat(req.query.n2);
+   const n1 = parseFloat(ValidacionesHelper.getIntegerOrDefault(req.query.n1 , null));
+    const n2 = parseFloat(ValidacionesHelper.getIntegerOrDefault(req.query.n2 , null));
      
-    if (isNaN(n1) || isNaN(n2)) {
+    if ((n1 === null) || (n2 === null)) {
         return res.status(400).send("Error: Ambos parámetros deben ser números.");
     }
 
@@ -105,10 +109,10 @@ app.get("/matematica/resta", (req, res) =>{
 
 app.get("/matematica/multiplicar", (req, res) =>{
 
-   const n1 = parseFloat(req.query.n1);
-    const n2 = parseFloat(req.query.n2);
+   const n1 = parseFloat(ValidacionesHelper.getIntegerOrDefault(req.query.n1 , null));
+    const n2 = parseFloat(ValidacionesHelper.getIntegerOrDefault(req.query.n2 , null));
      
-    if (isNaN(n1) || isNaN(n2)) {
+      if ((n1 === null) || (n2 === null)) {
         return res.status(400).send("Error: Ambos parámetros deben ser números.");
     }
 
@@ -122,12 +126,14 @@ app.get("/matematica/multiplicar", (req, res) =>{
 
 app.get("/matematica/dividir", (req, res) =>{
 
-   const n1 = parseFloat(req.query.n1);
-    const n2 = parseFloat(req.query.n2);
-     
-    if (isNaN(n1) || isNaN(n2)) {
+   const n1 = parseFloat(ValidacionesHelper.getIntegerOrDefault(req.query.n1, null));
+    const n2 = parseFloat(ValidacionesHelper.getIntegerOrDefault(req.query.n2 , null));
+
+   if ((n1 === null) || (n2 === null)) {
         return res.status(400).send("Error: Ambos parámetros deben ser números.");
     }
+
+  
 
   
     const resultado = dividir(n1, n2);
@@ -140,8 +146,8 @@ app.get("/matematica/dividir", (req, res) =>{
     app.get("/omdb-wrapper/searchbypage", async (req, res) =>{
 try {
         // Primero: sacamos los datos de la URL (req.query)
-        const search = req.query.search;
-        const p      = req.query.p || 1;
+        const search = ValidacionesHelper.getStringOrDefault(req.query.search , '');
+        const p      = ValidacionesHelper.getIntegerOrDefault(req.query.p || 1 , 1);
 
         // Segundo: llamamos a la función
         let resultado = await OMDBSearchByPage(search, p);
@@ -156,7 +162,7 @@ try {
     })
 
 app.get("/omdb-wrapper/searchcomplete", async (req, res) => {
-    const search = req.query.search;
+    const search = ValidacionesHelper.getStringOrDefault(req.query.search, '');
     let envelope = { respuesta: false, cantidadTotal: 0, datos: [] };
 
     console.log("--- Iniciando búsqueda completa para:", search, "---");
@@ -193,7 +199,10 @@ app.get("/omdb-wrapper/searchcomplete", async (req, res) => {
         }
 
         res.status(200).json(envelope);
-
+        
+        if(search === ''){
+            status(400)
+        }
     } catch (ex) {
         console.error("ERROR CRÍTICO:", ex.message);
         res.status(500).json(envelope);
@@ -202,7 +211,7 @@ app.get("/omdb-wrapper/searchcomplete", async (req, res) => {
 
 app.get('/omdb-wrapper/getbyomdbid', async (req, res) => {
     // 1. Obtenemos el ID de la query string (?imdbID=tt12345)
-    const imdbID = req.query.imdbID;
+    const imdbID = ValidacionesHelper.getStringOrDefault(req.query.imdbID, '');
 
     // Estructura del envelope para un objeto único
     let envelope = {
@@ -211,7 +220,7 @@ app.get('/omdb-wrapper/getbyomdbid', async (req, res) => {
         datos: {} // Objeto vacío por defecto
     };
 
-    if (!imdbID) {
+    if (imdbID=== '') {
         return res.status(400).json(envelope);
     }
 
@@ -254,7 +263,7 @@ app.get('/alumnos', (req, res) => {
 
 app.get('/alumnos/:dni', (req, res) => {
    
-   const dniBusqueda = req.params.dni;
+   const dniBusqueda = ValidacionesHelper.getStringOrDefault(req.params.dni, '');
    const alumnoEncontrado = alumnosArray.find(alumno => alumno.dni === dniBusqueda);
     if (alumnoEncontrado) {
         
@@ -268,7 +277,7 @@ app.get('/alumnos/:dni', (req, res) => {
 app.post('/alumnos', (req, res) => {
    
    
-    const { username, dni, edad } = req.body;
+    const { username, dni, edad } =validacionesHelper.getStringOrDefault(req.body,'') ;
 
    
     if (!username || !dni || !edad) {
@@ -285,7 +294,7 @@ app.post('/alumnos', (req, res) => {
 
 app.delete('/alumnos', (req, res) => {
    
-    const { dni } = req.body;
+    const { dni } = validacionesHelper.getStringOrDefault(req.body, '');
 
    
     const index = alumnosArray.findIndex(alumno => alumno.dni === dni);
@@ -304,4 +313,69 @@ app.delete('/alumnos', (req, res) => {
        
         res.status(404).send("No se encontró ningún alumno con ese DNI");
     }
+});
+
+
+app.get('/fechas/isDate', (req, res) => {
+  const fecha = ValidacionesHelper.getDateOrDefault(req.query.fecha, null);
+
+  if (!DateTimeHelper.isDate(fecha)) {
+    return res.status(400).json({ error: 'Fecha inválida' });
+  }
+
+  return res.status(200).json({ valido: true });
+});
+
+
+app.get('/fechas/getEdadActual', (req, res) => {
+  const fechaNac = ValidacionesHelper.getDateOrDefault(req.query.fechaNacimiento, null);
+
+  if (!DateTimeHelper.isDate(fechaNac)) {
+    return res.status(400).json({ error: 'Fecha inválida' });
+  }
+
+  const edadCalculada = DateTimeHelper.getEdadActual(fechaNac);
+  return res.status(200).json({ edad: edadCalculada });
+});
+
+
+app.get('/fechas/getDiasHastaMiCumple', (req, res) => {
+  const fechaNac = ValidacionesHelper.getDateOrDefault(req.query.fechaNacimiento, null);
+
+  if (!DateTimeHelper.isDate(fechaNac)) {
+    return res.status(400).json({ error: 'Fecha inválida' });
+  }
+
+  const dias = DateTimeHelper.getDiasHastaMiCumple(fechaNac);
+  return res.status(200).json({ diasRestantes: dias });
+});
+
+
+app.get('/fechas/getDiaTexto', (req, res) => {
+  const fecha = ValidacionesHelper.getDateOrDefault(req.query.fecha, null);
+  
+  if (!DateTimeHelper.isDate(fecha)) {
+    return res.status(400).json({ error: 'Fecha inválida' });
+  }
+
+  
+  const abreviar = ValidacionesHelper.getBooleanOrDefault(req.query.abr, false);
+  
+  const diaTexto = DateTimeHelper.getDiaTexto(fecha, abreviar);
+  return res.status(200).json({ dia: diaTexto });
+});
+
+
+app.get('/fechas/getMesTexto', (req, res) => {
+  const fecha = ValidacionesHelper.getDateOrDefault(req.query.fecha, null);
+  
+  if (!DateTimeHelper.isDate(fecha)) {
+    return res.status(400).json({ error: 'Fecha inválida' });
+  }
+
+  
+  const abreviar = ValidacionesHelper.getBooleanOrDefault(req.query.abr, false);
+
+  const mesTexto = DateTimeHelper.getMesTexto(fecha, abreviar);
+  return res.status(200).json({ mes: mesTexto });
 });

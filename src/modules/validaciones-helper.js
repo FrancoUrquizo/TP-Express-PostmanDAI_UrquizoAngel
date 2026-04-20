@@ -23,18 +23,23 @@ class ValidacionesHelper {
     }
     return parsedString;
   };
-
-  getDateOrDefault    = (value, defaultValue) => { 
-    if(value === null || value === undefined){
-        return defaultValue
+getDateOrDefault = (value, defaultValue) => {
+   
+    if (value === null || value === undefined) {
+      return defaultValue;
     }
-    const parseDate = new Date (value)
+
+    
+    const parsedDate = new Date(value);
+
+   
     if (Number.isNaN(parsedDate.getTime())) {
       return defaultValue;
     }
-     return parseDate
-        
-   };
+
+   
+    return parsedDate;
+  };
 
 
   getBooleanOrDefault = (value, defaultValue) => { 
